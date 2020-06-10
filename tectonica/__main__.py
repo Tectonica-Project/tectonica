@@ -2,17 +2,18 @@ import PySimpleGUI as sg
 import threading
 
 from .features.map_feature import MapFeature
+from .physics.vector import Vector
+
+
 
 class MainGame(
     MapFeature,
     ):
     window: sg.Window
     layout: list
-    global_timer: int
 
     def __init__(self):
         sg.theme('Dark Blue 3')  # please make your windows colorful
-        self.global_timer = 0
 
     def open_window(self):
 
@@ -38,8 +39,7 @@ class MainGame(
     def run(self):
         self.init_map()
 
-        self.map_ticking_thread = threading.Thread(target=self.tick_map)
-        self.map_ticking_thread.start()
+
 
         while True:  # Event Loop
             event, values = self.window.read()
