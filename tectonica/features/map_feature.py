@@ -5,6 +5,7 @@ import math
 import PySimpleGUI as sg
 
 from ..physics.vector import Vector
+from ..physics.separating_axis_theorem import project_points_on_axis, check_for_collision_on_1_shape_axis
 
 def draw_vector(self, point_from,
         point_to,
@@ -31,24 +32,13 @@ sg.Graph.draw_vector = draw_vector
 class MapFeature():
     def init_map(self):
 
-        v1 = Vector(40, 20)
-        v2 = Vector(100, 10)
+        self.points1 = [(20,-20), (20,20), (-20, 20), (-20,-20)]
 
-        self.window['map_graph'].draw_vector(
-            point_from=(0,0),
-            point_to=v1,
-            color="red",
-        )
-        self.window['map_graph'].draw_vector(
-            point_from=(0,0),
-            point_to=v2,
-            color="#BADA55",
-        )
-        self.window['map_graph'].draw_vector(
-            point_from=(0,0),
-            point_to=v1.project(v2),
-            color="orange",
-        )
+        self.points2 = [(-40,-20), (10,-10), (-70, 30), (-50,-40)]
+
+        self.shape2 = self.window['map_graph'].draw_polygon(self.points2, line_color='cyan')
+        self.shape1 = self.window['map_graph'].draw_polygon(self.points1, line_color='red')
+        self.prev_pos_1 = Vector(0,0)
 
         self.map_timer = 0
 
@@ -56,6 +46,30 @@ class MapFeature():
         self.map_ticking_thread.start()
 
     map_timer: int
+
+    def map_move_shape(self, pos):
+
+        self.points1 = [(Vector(*i) + -(self.prev_pos_1 - Vector(*pos))) for i in self.points1]
+
+
+        self.prev_pos_1 = Vector(*pos)
+
+
+        self.update_shape()
+
+
+    def update_shape(self):
+
+        collides = check_for_collision_on_1_shape_axis(self.points1, self.points2, self.window['map_graph'])
+        collides &= check_for_collision_on_1_shape_axis(self.points2, self.points1, self.window['map_graph'])
+
+        self.window['colliding'].update('Colliding' if collides else 'Not colliding')
+    
+        self.window['map_graph'].delete_figure(self.shape1)        
+
+        self.shape1 = self.window['map_graph'].draw_polygon(self.points1, line_color='red')
+        
+
 
     def tick_map(self):
         self.map_timer += 1

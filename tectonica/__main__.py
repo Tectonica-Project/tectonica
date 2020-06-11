@@ -25,8 +25,10 @@ class MainGame(
                 # Use latitude/longitude as graph coordinates
                 graph_bottom_left=(-180, 90), 
                 graph_top_right = (180,-90), 
+                enable_events = True,
                 key='map_graph'
             )],
+            [sg.Text(size=(12,1), key='colliding')],
             [sg.Text('Your typed chars appear here:'), sg.Text(size=(12,1), key='-OUTPUT-')],
             [sg.Input(key='-IN-')],
             [sg.Button('Show'), sg.Button('Exit')]]
@@ -43,11 +45,14 @@ class MainGame(
 
         while True:  # Event Loop
             event, values = self.window.read()
+            print(event, values)
             if event == sg.WIN_CLOSED or event == 'Exit':
                 break
-            if event == 'Show':
+            elif event == 'Show':
                 # change the "output" element to be the value of "input" element
                 self.window['-OUTPUT-'].update(values['-IN-'])
+            elif event == 'map_graph':
+                self.map_move_shape(values['map_graph'])
 
 
         self.window.close()
